@@ -1,10 +1,14 @@
 import math
 
 # Function to convert color temperature (K) to RGB
-def color_temp_to_rgb(temp_k):
+def color_temp_to_rgb(temp_k, tint=0):
     """
     Converts color temperature to RGB using the formula.
-    The formula is a simplification and approximation.
+    Allows adding a tint (magenta or green) by adjusting the red and green channels.
+    
+    Args:
+        temp_k: Color temperature in Kelvin.
+        tint: Tint adjustment (-5 to 5), where positive adds magenta and negative adds green.
     """
     temp = temp_k / 100.0
     if temp <= 66:
@@ -23,7 +27,15 @@ def color_temp_to_rgb(temp_k):
         g = temp - 60
         g = 288.1221695283 * (g ** -0.0755148492)
         b = 255
-    
+
+    # Scale tint adjustment (±5 mapped to 0-255 range)
+    magenta_adjust = (tint / 5) * 255
+    green_adjust = (-tint / 5) * 255
+
+    # Apply scaled tint adjustments to red and green
+    r += magenta_adjust
+    g += green_adjust
+
     # Clamp the values to [0, 255]
     r = min(max(0, r), 255)
     g = min(max(0, g), 255)
@@ -69,9 +81,15 @@ def main():
     # Input: Select the color temperature you want (e.g., 3200K, 5000K, 6500K, etc.)
     temp_k = float(input("Enter the desired color temperature (K): "))
     
+    # Input: Select the tint adjustment with decimal support
+    tint = float(input("Enter tint adjustment (-5 to 5, decimal values allowed): "))
+    
+    # Ensure the input is within bounds
+    tint = max(-5, min(5, tint))
+    
     # Step 1: Convert the color temperature to RGB
-    rgb_linear = color_temp_to_rgb(temp_k)
-    print(f"Linear RGB for {temp_k}K: {rgb_linear}")
+    rgb_linear = color_temp_to_rgb(temp_k, tint=tint)
+    print(f"Linear RGB for {temp_k}K with tint: {rgb_linear}")
     
     # Step 2: Apply Rec. 709 gamma correction
     rgb_rec_709 = rec_709_gamma(rgb_linear)
@@ -83,4 +101,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-65
